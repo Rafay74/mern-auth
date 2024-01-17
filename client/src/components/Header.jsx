@@ -8,7 +8,6 @@ const Header = () => {
                 <Link to='/'>
                     <h1 className='font-bold'>Auth App</h1>
                 </Link>
-
                 <ul className='flex gap-4'>
                     <Link to='/'>
                         <li>Home</li>
