@@ -2,9 +2,9 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 const SignUp = () => {
   const [formData, setFormData] = useState({});
-  const [loading,setLoading] = useState(false);
-  const [error,setError] = useState(false);
-  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
@@ -14,23 +14,26 @@ const SignUp = () => {
     e.preventDefault();
     try {
       setLoading(true)
-      const res = await fetch('/api/auth/signup',{
+      const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
-          'Content-Type' : 'application/json'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(formData)
       })
       const data = await res.json()
-      setLoading(false)
       console.log(data)
+      setLoading(false)
+      if (data.success === false) {
+        setError(true)
+        return;
+      }
+
     } catch (error) {
       setLoading(false)
       setLoading(true)
     }
   }
-
-  console.log(formData)
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl text-center font-semibold my-7'>Sign Up</h1>
@@ -46,6 +49,7 @@ const SignUp = () => {
           <span className='text-blue-500'>Sign In</span>
         </Link>
       </div>
+      <p className='text-red-700 mt-5'>{error && 'Something went wrong!'}</p>
     </div>
   )
 }
