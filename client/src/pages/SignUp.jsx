@@ -1,11 +1,14 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { signInSuccess, signInFailure, signInStart } from '../redux/user/userSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import OAuth from '../components/OAuth';
+
 const SignUp = () => {
   const [formData, setFormData] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const { loading, error } = useSelector((state) => state.user || {})
   const navigate = useNavigate()
-
+  const dispatch = useDispatch()
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
@@ -14,7 +17,7 @@ const SignUp = () => {
     //sending data back to database 
     e.preventDefault();
     try {
-      setLoading(true)
+      dispatch(signInStart())
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
@@ -23,16 +26,14 @@ const SignUp = () => {
         body: JSON.stringify(formData)
       })
       const data = await res.json()
-      console.log(data)
-      setLoading(false)
       if (data.success === false) {
-        setError(true)
+        dispatch(signInFailure(data))
         return;
       }
+      dispatch(signInSuccess(data))
       navigate('/sign-in')
     } catch (error) {
-      setLoading(false)
-      setLoading(true)
+      dispatch(signInFailure(error))
     }
   }
   return (
@@ -43,6 +44,7 @@ const SignUp = () => {
         <input type="text" placeholder='Email' id='email' className='bg-slate-100 p-3 rounded-lg' onChange={handleChange} />
         <input type="password" placeholder='Password' id='password' className='bg-slate-100 p-3 rounded-lg' onChange={handleChange} />
         <button className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95'>Sign Up</button>
+        <OAuth/>
       </form>
       <div className='flex gap-1 mt-5'>
         <p>Have an account?</p>
@@ -50,7 +52,7 @@ const SignUp = () => {
           <span className='text-blue-500'>Sign In</span>
         </Link>
       </div>
-      <p className='text-red-700 mt-5'>{error && 'Something went wrong!'}</p>
+      <p className='text-red-700 mt-5'>{error ? error.message || 'Something went wrong!' : ''}</p>
     </div>
   )
 }
